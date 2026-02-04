@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Categories=Utilities;
+Name=Vortex
+Terminal=false
+X-KeepTerminal=false
+Path=/home/deck
+Exec=/home/deck/vortex.sh
+NoDisplay=false
+Hidden=false
