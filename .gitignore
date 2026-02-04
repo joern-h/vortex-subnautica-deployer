@@ -115,3 +115,5 @@ cython_debug/
 # pyenv
 .python-version
 
+# local files
+state.v2.local/

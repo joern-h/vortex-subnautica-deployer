@@ -5,6 +5,7 @@ Analyze key patterns in the LevelDB database
 import plyvel
 import sys
 from collections import defaultdict
+import config
 
 def analyze_keys(db_path='state/'):
     """Analyze key patterns and structure"""
@@ -73,6 +74,20 @@ def analyze_keys(db_path='state/'):
     db.close()
 
 if __name__ == "__main__":
-    db_path = sys.argv[1] if len(sys.argv) > 1 else 'state/'
-    analyze_keys(db_path)
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Analyze key patterns in the LevelDB database')
+    parser.add_argument('--db', default=None, help='Path to LevelDB database (default: auto-detect from config)')
+
+    args = parser.parse_args()
+
+    # Use config if no db path specified
+    if args.db is None:
+        try:
+            args.db = config.get_safe_db_path()
+        except (FileNotFoundError, RuntimeError) as e:
+            print(f"ERROR: {e}")
+            sys.exit(1)
+
+    analyze_keys(args.db)
 

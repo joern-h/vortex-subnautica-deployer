@@ -5,6 +5,7 @@ Dump all entries from the LevelDB database
 import plyvel
 import sys
 import json
+import config
 
 def dump_database(db_path='state/', output_file=None):
     """Dump all database entries"""
@@ -53,7 +54,21 @@ def dump_database(db_path='state/', output_file=None):
         print(json.dumps(entries, indent=2))
 
 if __name__ == "__main__":
-    db_path = sys.argv[1] if len(sys.argv) > 1 else 'state/'
-    output_file = sys.argv[2] if len(sys.argv) > 2 else None
-    dump_database(db_path, output_file)
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Dump all entries from the LevelDB database')
+    parser.add_argument('--db', default=None, help='Path to LevelDB database (default: auto-detect from config)')
+    parser.add_argument('--output', '-o', default=None, help='Output file (default: stdout)')
+
+    args = parser.parse_args()
+
+    # Use config if no db path specified
+    if args.db is None:
+        try:
+            args.db = config.get_safe_db_path()
+        except (FileNotFoundError, RuntimeError) as e:
+            print(f"ERROR: {e}")
+            sys.exit(1)
+
+    dump_database(args.db, args.output)
 

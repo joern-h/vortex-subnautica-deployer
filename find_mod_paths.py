@@ -185,8 +185,8 @@ if __name__ == "__main__":
     # Use config if no db path specified
     if args.db is None:
         try:
-            args.db = config.get_db_path()
-        except FileNotFoundError as e:
+            args.db = config.get_safe_db_path()
+        except (FileNotFoundError, RuntimeError) as e:
             print(f"ERROR: {e}")
             sys.exit(1)
 

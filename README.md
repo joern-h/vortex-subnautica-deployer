@@ -12,14 +12,18 @@ The `deploy_mods.py` script reads Vortex's LevelDB database to find enabled mods
 
 **⚠️ IMPORTANT: All scripts are READ-ONLY** - They never write to the Vortex database. Your Vortex configuration is completely safe.
 
+**🔒 NEW: Database Corruption Protection** - All scripts now check for Vortex's lockfile and work with a local copy of the database to prevent any corruption, even from read-only access. See [SAFETY_LOCKFILE.md](SAFETY_LOCKFILE.md) for details.
+
 ## Features
 
-✅ **Automatic profile detection** - Finds and uses your currently active profile  
-✅ **Correct deployment order** - BepInEx framework first, then plugins  
-✅ **Smart filtering** - Only deploys enabled mods, skips collections  
-✅ **Path conversion** - Handles Windows to Linux path conversion  
-✅ **Safe preview mode** - Dry-run option to preview changes before applying  
-✅ **Proper structure** - BepInEx framework → game root, plugins → BepInEx/plugins/  
+✅ **Automatic profile detection** - Finds and uses your currently active profile
+✅ **Correct deployment order** - BepInEx framework first, then plugins
+✅ **Smart filtering** - Only deploys enabled mods, skips collections
+✅ **Path conversion** - Handles Windows to Linux path conversion
+✅ **Safe preview mode** - Dry-run option to preview changes before applying
+✅ **Proper structure** - BepInEx framework → game root, plugins → BepInEx/plugins/
+✅ **Lockfile protection** - Prevents database access while Vortex is running
+✅ **Local copy safety** - Works with a local database copy to prevent corruption
 
 ## Quick Start
 
@@ -34,6 +38,28 @@ python3 deploy_mods.py
 ```
 
 That's it! Your mods should now be properly deployed and will load when you start the game.
+
+**Note:** If Vortex is running, you'll get an error message asking you to close it first. This is a safety feature to prevent database corruption.
+
+## Safety Features
+
+### Database Corruption Protection
+
+All scripts now implement **lockfile-based safety** to prevent database corruption:
+
+1. **Checks for Vortex lockfile** before accessing the database
+2. **Aborts if Vortex is running** with a clear error message
+3. **Creates a local copy** of the database (`state.v2.local`) when safe
+4. **Uses the local copy** for all operations
+
+This means:
+- ✅ **Zero risk of corruption** - Never accesses database while Vortex is running
+- ✅ **Automatic safety** - No manual checks needed
+- ✅ **Clear error messages** - You'll know exactly what to do if Vortex is running
+- ✅ **Fast operations** - Local copy means no Wine/Proton overhead
+- ✅ **Always fresh data** - Creates a new copy every time you run a script
+
+For more details, see [SAFETY_LOCKFILE.md](SAFETY_LOCKFILE.md).
 
 ## Requirements
 
