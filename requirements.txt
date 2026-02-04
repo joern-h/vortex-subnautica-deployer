@@ -1,0 +1,6 @@
+# Vortex Mod Fixer Requirements
+# Python dependencies for reading Vortex's LevelDB database
+
+# LevelDB Python bindings
+plyvel>=1.5.0
+
