@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Categories=Utilities;
+Name=Vortex
+Terminal=false
+X-KeepTerminal=false
+Path=/home/deck/tools/vortexfixer/bin
+Exec=/home/deck/tools/vortexfixer/bin/vortex.sh -d %u
+NoDisplay=false
+Hidden=false
