@@ -25,16 +25,130 @@ The `deploy_mods.py` script reads Vortex's LevelDB database to find enabled mods
 ✅ **Lockfile protection** - Prevents database access while Vortex is running
 ✅ **Local copy safety** - Works with a local database copy to prevent corruption
 
+## Installation
+
+### 1. Clone the Repository
+
+Clone this repository into your tools directory:
+
+```bash
+mkdir -p ~/tools
+cd ~/tools
+git clone https://github.com/yourusername/vortex-subnautica-deployer.git
+cd vortex-subnautica-deployer
+```
+
+### 2. Proton GE Setup
+
+Install Lutris and ProtonUp-Qt for managing Proton versions:
+
+```bash
+# Install Lutris (method varies by distro)
+
+# Steam Deck / SteamOS (recommended - use Flatpak):
+flatpak install flathub net.lutris.Lutris
+
+# Ubuntu/Debian:
+sudo apt install lutris
+
+# Arch/Manjaro/EndeavourOS:
+sudo pacman -S lutris
+
+# Install ProtonUp-Qt (all distros - use Flatpak)
+flatpak install flathub net.davidotek.pupgui2
+```
+
+Install GE-Proton 10.29:
+
+```bash
+# Launch ProtonUp-Qt
+flatpak run net.davidotek.pupgui2
+
+# In ProtonUp-Qt:
+# 1. Select "Steam" as the install location
+# 2. Click "Add version"
+# 3. Select "GE-Proton" from the compatibility tool dropdown
+# 4. Select version "10.29" from the list
+# 5. Click "Install"
+```
+
+### 3. Linuxbrew Python Setup
+
+Install Linuxbrew (Homebrew for Linux):
+
+```bash
+# Install Linuxbrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Add Homebrew to your PATH (add these lines to your ~/.bashrc or ~/.zshrc)
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+```
+
+Install dependencies via Homebrew:
+
+```bash
+# Install GCC, LevelDB, and Python 3.12
+brew install gcc leveldb python@3.12
+```
+
+Create and activate a Python virtual environment:
+
+```bash
+# Create virtual environment with Python 3.12
+python3.12 -m venv .venv
+
+# Activate the virtual environment
+source .venv/bin/activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+```
+
+### 4. Add Bin Files to PATH
+
+Add the `bin` directory to your PATH for easy access to commands:
+
+```bash
+# Add to your ~/.bashrc or ~/.zshrc
+echo 'export PATH="$HOME/tools/vortex-subnautica-deployer/bin:$PATH"' >> ~/.bashrc
+
+# Reload your shell configuration
+source ~/.bashrc
+```
+
+Now you can use commands like `vortex-deploy`, `vortex-cleanup`, and `vortex-mods` from anywhere.
+
+### 5. Install Desktop Files
+
+Copy the desktop files to enable GUI integration and NXM link handling:
+
+```bash
+# Copy desktop files
+cp desktop-files/*.desktop ~/.local/share/applications/
+
+# Set the default handler for NXM links (Nexus Mods download links)
+xdg-mime default vortex-dl.desktop x-scheme-handler/nxm-protocol
+xdg-mime default vortex-dl.desktop x-scheme-handler/nxm
+```
+
+This allows you to:
+
+- Click NXM links in your browser to download mods directly to Vortex
+- Access Vortex tools from your application menu
+
 ## Quick Start
 
 ### 1. Preview what will be deployed
+
 ```bash
-python3 deploy_mods.py --dry-run
+vortex-deploy --dry-run
 ```
 
 ### 2. Deploy the mods
+
 ```bash
-python3 deploy_mods.py
+vortex-deploy
 ```
 
 That's it! Your mods should now be properly deployed and will load when you start the game.
@@ -53,6 +167,7 @@ All scripts now implement **lockfile-based safety** to prevent database corrupti
 4. **Uses the local copy** for all operations
 
 This means:
+
 - ✅ **Zero risk of corruption** - Never accesses database while Vortex is running
 - ✅ **Automatic safety** - No manual checks needed
 - ✅ **Clear error messages** - You'll know exactly what to do if Vortex is running
@@ -60,16 +175,6 @@ This means:
 - ✅ **Always fresh data** - Creates a new copy every time you run a script
 
 For more details, see [SAFETY_LOCKFILE.md](SAFETY_LOCKFILE.md).
-
-## Requirements
-
-- Python 3
-- `plyvel` library for LevelDB access
-
-Install dependencies:
-```bash
-pip install plyvel
-```
 
 ## Configuration
 
@@ -79,7 +184,9 @@ The scripts automatically detect your Vortex database and game paths using `conf
 - **Subnautica Game**: `~/.steam/steam/steamapps/common/Subnautica`
 
 To verify your configuration:
+
 ```bash
+cd ~/tools/vortex-subnautica-deployer
 python3 config.py
 ```
 
@@ -89,16 +196,16 @@ If your paths are different, edit `config.py` to match your setup.
 
 ```bash
 # Preview deployment (recommended first step)
-python3 deploy_mods.py --dry-run
+vortex-deploy --dry-run
 
 # Actually deploy mods
-python3 deploy_mods.py
+vortex-deploy
 
 # Use custom database path
-python3 deploy_mods.py --db /path/to/vortex/state/
+vortex-deploy --db /path/to/vortex/state/
 
 # Specify different game
-python3 deploy_mods.py --game subnautica
+vortex-deploy --game subnautica
 ```
 
 ## How It Works
@@ -149,18 +256,23 @@ Total mods processed: 13
 Total symlinks created: 93
 ```
 
-## Other Useful Scripts
+## Other Useful Commands
 
-### `find_enabled_mods.py`
+### `vortex-mods`
+
 Shows currently enabled mods for the active profile.
+
 ```bash
-python3 find_enabled_mods.py
+vortex-mods
 ```
 
 ### `find_mod_paths.py`
+
 Shows installation paths and details for mods.
+
 ```bash
 # Show only enabled mods
+cd ~/tools/vortex-subnautica-deployer
 python3 find_mod_paths.py
 
 # Show all mods
@@ -168,35 +280,40 @@ python3 find_mod_paths.py --all
 ```
 
 ### `explore_db.py`
+
 General database exploration and statistics.
+
 ```bash
+cd ~/tools/vortex-subnautica-deployer
 python3 explore_db.py
 ```
 
 ## Removing Symlinks
 
-If you want to undeploy all mods and remove the symlinks, use the cleanup script:
+If you want to undeploy all mods and remove the symlinks, use the cleanup command:
 
-### `cleanup_mods.py`
+### `vortex-cleanup`
 
 ```bash
 # Preview what symlinks would be removed
-python3 cleanup_mods.py --dry-run
+vortex-cleanup --dry-run
 
 # Actually remove all symlinks
-python3 cleanup_mods.py
+vortex-cleanup
 
 # Remove with verbose output (shows each symlink)
-python3 cleanup_mods.py --verbose
+vortex-cleanup --verbose
 ```
 
 **What it does:**
+
 - Scans the game directory for symlinks
 - Only removes symlinks (never removes real files)
 - Shows you exactly what will be removed
 - Supports dry-run mode for safety
 
 **Example output:**
+
 ```
 ================================================================================
 VORTEX MOD CLEANUP SCRIPT
@@ -225,21 +342,23 @@ Symlinks removed: 104
 ## Troubleshooting
 
 **Q: Script says "ERROR: Could not open database"**
-A: Make sure you're running the script from the directory containing the `state/` folder, or use `--db` to specify the path.
+A: Make sure the Vortex database path in `config.py` is correct, or use `--db` to specify the path.
 
 **Q: Mods still don't load in game**
 A: Make sure you ran the script without `--dry-run`. Check that symlinks were created in the game directory.
 
 **Q: I want to undeploy mods**
-A: Use `python3 cleanup_mods.py` to remove all symlinks. You can also disable specific mods in Vortex and re-run `deploy_mods.py`.
+A: Use `vortex-cleanup` to remove all symlinks. You can also disable specific mods in Vortex and re-run `vortex-deploy`.
 
 **Q: How do I know if mods are deployed?**
-A: Run `python3 cleanup_mods.py --dry-run` to see how many symlinks exist in your game directory.
+A: Run `vortex-cleanup --dry-run` to see how many symlinks exist in your game directory.
 
-**Q: Will cleanup_mods.py delete my mod files?**
+**Q: Will vortex-cleanup delete my mod files?**
 A: No! It only removes symlinks, never real files. Your mods remain safe in the staging directory.
+
+**Q: Commands not found after adding to PATH**
+A: Make sure you've reloaded your shell configuration with `source ~/.bashrc` or opened a new terminal window.
 
 ## License
 
 This is a utility script created to fix a specific issue with Vortex Mod Manager on Linux. Use at your own risk.
-
